@@ -1,4 +1,4 @@
-package utilities;
+package utilities
 
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.*;
@@ -7,7 +7,6 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.testng.TestException;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,11 +25,11 @@ public class UI_Helper {
     }
 
     public static void navigateToURL(String URL) {
-
         try {
             Driver.getDriver().navigate().to(URL);
         } catch (Exception e) {
             e.printStackTrace();
+
         }
     }
 
@@ -72,11 +71,7 @@ public class UI_Helper {
 
     public static void select_radio_button_by_index(List<WebElement> radio_buttons,int index){
         String webelement_to_string=radio_buttons.toString();
-//        String xpath=webelement_to_string.substring(webelement_to_string.indexOf(": //")+2,webelement_to_string.indexOf("']")+2);
-//        WebElement radio_button_selected=Driver.getDriver().findElement(By.xpath("("+xpath+")["+place+"]"));
         radio_buttons.get(index).click();
-//                radio_button_selected.click();
-
     }
 
     public static void select_checkbox_by_attribute_value(List<WebElement> checkboxes,String attribute, String attribute_value){
@@ -93,9 +88,9 @@ public class UI_Helper {
 
     public static void select_checkbox_by_index(List<WebElement> checkboxes,int index){
 
-                if(!checkboxes.get(index).isSelected()){
-                    checkboxes.get(index).click();
-                }
+        if(!checkboxes.get(index).isSelected()){
+            checkboxes.get(index).click();
+        }
     }
     public static void right_click(WebElement element){
         new Actions(Driver.getDriver()).contextClick(element).perform();
@@ -105,12 +100,12 @@ public class UI_Helper {
         new Actions(Driver.getDriver()).doubleClick(element).perform();
     }
 
-    public static void getScreenshot(String screenshotName) {
+    public static void getScreenshot(String foldername, String screenshotName) {
 
         String screenshotTime = new SimpleDateFormat("yyyyMMddhhmmss").format(new Date());
         TakesScreenshot ts = (TakesScreenshot) Driver.getDriver();
         File source = ts.getScreenshotAs(OutputType.FILE);
-        String targetPath = "./target/Screenshots/Screenshot" + screenshotName + screenshotTime + ".png";
+        String targetPath = foldername+"/" + screenshotName + screenshotTime + ".png";
         File destination = new File(targetPath);
         try {
             FileUtils.copyFile(source, destination);
@@ -190,13 +185,13 @@ public class UI_Helper {
     }
 
     public static void scroll_up_or_down_to_pixels(int pixel_number) {
-       ((JavascriptExecutor) Driver.getDriver()).executeScript("scroll(0,"+pixel_number+")");
+        ((JavascriptExecutor) Driver.getDriver()).executeScript("scroll(0,"+pixel_number+")");
 
     }
 
     public static void scroll_into_view(WebElement element) {
         ((JavascriptExecutor) Driver.getDriver()).executeScript("arguments[0].scrollIntoView(true)", element);
-   }
+    }
 
     public static void highLight_Element(WebElement element) {
         ((JavascriptExecutor) Driver.getDriver()).executeScript("arguments[0].setAttribute('style', 'background: yellow; border: 2px solid red;');", element);
