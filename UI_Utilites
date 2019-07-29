@@ -1,0 +1,220 @@
+package utilities;
+
+import org.apache.commons.io.FileUtils;
+import org.openqa.selenium.*;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.TestException;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+public class UI_Helper {
+
+    public static void sleep(int seconds){
+        try {
+            Thread.sleep(seconds*1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public static void navigateToURL(String URL) {
+
+        try {
+            Driver.getDriver().navigate().to(URL);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static String get_text_from_input_box(WebElement input_box){
+        return input_box.getAttribute("value");
+    }
+
+    public static String get_selected_option_dropdown(WebElement dropdown){
+        return new Select(dropdown).getFirstSelectedOption().getText();
+    }
+
+    public static void select_by_visible_text_dropdown(WebElement dropdown,String select){
+        new Select(dropdown).selectByVisibleText(select);
+    }
+    public static void select_by_index_dropdown(WebElement dropdown,int index){
+        new Select(dropdown).selectByIndex(index);
+    }
+    public static void select_by_value_dropdown(WebElement dropdown,String value){
+        new Select(dropdown).selectByValue(value);
+    }
+    public static List<String> get_list_dropdown(WebElement dropdown){
+        List<WebElement> dropdown_elements=new Select(dropdown).getOptions();
+        List<String> dropdown_list=new ArrayList<>();
+        for(WebElement element:dropdown_elements){
+            if(element.getText().length()!=0){
+                dropdown_list.add(element.getText());
+            }
+        }
+        return dropdown_list;
+    }
+
+    public static void select_radio_button_by_value(List<WebElement> radio_buttons, String radio_value){
+        for(WebElement element:radio_buttons) {
+            if (element.getAttribute("value").contains(radio_value)) {
+                element.click();
+            }
+        }
+    }
+
+    public static void select_radio_button_by_index(List<WebElement> radio_buttons,int index){
+        String webelement_to_string=radio_buttons.toString();
+//        String xpath=webelement_to_string.substring(webelement_to_string.indexOf(": //")+2,webelement_to_string.indexOf("']")+2);
+//        WebElement radio_button_selected=Driver.getDriver().findElement(By.xpath("("+xpath+")["+place+"]"));
+        radio_buttons.get(index).click();
+//                radio_button_selected.click();
+
+    }
+
+    public static void select_checkbox_by_attribute_value(List<WebElement> checkboxes,String attribute, String attribute_value){
+        for(WebElement element: checkboxes){
+            if(element.getAttribute(attribute).equalsIgnoreCase(attribute_value)){
+                if(!element.isSelected()){
+                    element.click();
+                }
+            }
+        }
+
+    }
+
+
+    public static void select_checkbox_by_index(List<WebElement> checkboxes,int index){
+
+                if(!checkboxes.get(index).isSelected()){
+                    checkboxes.get(index).click();
+                }
+    }
+    public static void right_click(WebElement element){
+        new Actions(Driver.getDriver()).contextClick(element).perform();
+    }
+
+    public static void double_click(WebElement element){
+        new Actions(Driver.getDriver()).doubleClick(element).perform();
+    }
+
+    public static void getScreenshot(String screenshotName) {
+
+        String screenshotTime = new SimpleDateFormat("yyyyMMddhhmmss").format(new Date());
+        TakesScreenshot ts = (TakesScreenshot) Driver.getDriver();
+        File source = ts.getScreenshotAs(OutputType.FILE);
+        String targetPath = "./target/Screenshots/Screenshot" + screenshotName + screenshotTime + ".png";
+        File destination = new File(targetPath);
+        try {
+            FileUtils.copyFile(source, destination);
+        } catch (IOException ioe) {
+
+        }
+
+    }
+
+    public static int get_row_count_webtable(WebElement table_element) {
+        return table_element.findElements(By.tagName("tr")).size();
+    }
+
+    public static int get_column_count_webtable(WebElement table_element) {
+        return table_element.findElements(By.tagName("tr")).get(1).findElements(By.tagName("td")).size();
+    }
+
+    public static String get_cell_data_on_webtable(WebElement table_element, int row_number, int column_number){
+        return table_element.findElement(By.xpath("//tr["+row_number+"]/td["+column_number+"]")).getText();
+
+    }
+
+    public static void click_cell_on_webtable(WebElement table_element, int row_number, int column_number){
+        table_element.findElement(By.xpath("//tr["+row_number+"]/td["+column_number+"]")).click();
+
+    }
+    public static List<Map<String,Integer>> get_data_location_on_webtable(WebElement table_element, String value){
+        List<Map<String,Integer>> data_location_list=new ArrayList<>();
+        for(int row_number=1; row_number<=get_row_count_webtable(table_element);row_number++){
+            try {
+                for (int column_number = 1; column_number <= get_column_count_webtable(table_element); column_number++) {
+                    Map<String,Integer> data_location_map=new HashMap<>();
+                    if (table_element.findElement(By.xpath("//tr[" + row_number + "]/td[" + column_number + "]")).getText().equalsIgnoreCase(value)) {
+                        data_location_map.put("column", column_number);
+                        data_location_map.put("row", row_number);
+                        data_location_list.add(data_location_map);
+                    }
+                }
+            }catch (NoSuchElementException e){
+
+            }
+        }
+        return data_location_list;
+    }
+
+    public static List<Map<String,Object>> get_all_data_on_webtable(WebElement table_element){
+        List<Map<String,Object>> table_data=new ArrayList<>();
+
+        for(int row_number=1; row_number<=get_row_count_webtable(table_element);row_number++){
+            Map<String,Object> data_location_map=new HashMap<>();
+            try {
+                for (int column_number = 1; column_number <= get_column_count_webtable(table_element); column_number++) {
+
+                    String header=table_element.findElement(By.xpath("//tr/th[" + column_number +"]")).getText().trim();
+                    if (header.length()>0) {
+                        Object data=table_element.findElement(By.xpath("//tr["+row_number+"]/td["+column_number+"]")).getText();
+                        data_location_map.put(header, data);
+                    }
+
+                }
+                table_data.add(data_location_map);
+            }catch (NoSuchElementException e){
+
+            }
+        }
+        return table_data;
+    }
+
+    public static WebElement wait_for_visibility(WebElement element, int timeToWaitInSec) {
+        WebDriverWait wait = new WebDriverWait(Driver.getDriver(), timeToWaitInSec);
+        return wait.until(ExpectedConditions.visibilityOf(element));
+    }
+
+    public static WebElement wait_for_clickability(WebElement element, int timeout) {
+        WebDriverWait wait = new WebDriverWait(Driver.getDriver(), timeout);
+        return wait.until(ExpectedConditions.elementToBeClickable(element));
+    }
+
+    public static void scroll_up_or_down_to_pixels(int pixel_number) {
+       ((JavascriptExecutor) Driver.getDriver()).executeScript("scroll(0,"+pixel_number+")");
+
+    }
+
+    public static void scroll_into_view(WebElement element) {
+        ((JavascriptExecutor) Driver.getDriver()).executeScript("arguments[0].scrollIntoView(true)", element);
+   }
+
+    public static void highLight_Element(WebElement element) {
+        ((JavascriptExecutor) Driver.getDriver()).executeScript("arguments[0].setAttribute('style', 'background: yellow; border: 2px solid red;');", element);
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+
+            System.out.println(e.getMessage());
+        }
+    }
+    public static void switch_to_other_window_or_popup(WebDriver driver) {
+        String parent_handle=driver.getWindowHandle();
+        Set<String> windowHandles=driver.getWindowHandles();
+        for(String window_handle:windowHandles) {
+            if(!window_handle.equals(parent_handle)) {
+                driver.switchTo().window(window_handle);
+            }
+        }
+    }
+}
